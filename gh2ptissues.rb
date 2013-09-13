@@ -2,15 +2,14 @@
 
 # Description:  Migrates GitHub Issues to Pivotal Tracker.
 
-GITHUB_ORG = 'APX'
-GITHUB_USER = 'shyam-habarakada'
-GITHUB_REPO = 'APX/benchpress-server'
-GITHUB_LOGIN = 'shyam-habarakada'
-PIVOTAL_PROJECT_ID = 836893
-PIVOTAL_PROJECT_USE_SSL = true
+GITHUB_USER = 'jondkinney'
+GITHUB_REPO = 'BOLSTR/Bolstr'
+GITHUB_LOGIN = 'jondkinney'
+PIVOTAL_PROJECT_ID = 833843
+PIVOTAL_PROJECT_USE_SSL = false
 
-GITHUB_PASSWORD = ENV['GITHUB_PASSWORD']
-PIVOTAL_TOKEN = ENV['PIVOTAL_TOKEN'].to_s unless ENV['PIVOTAL_TOKEN'].nil?
+GITHUB_PASSWORD = ''
+PIVOTAL_TOKEN = ''
 
 require 'rubygems'
 require 'octokit'
@@ -18,11 +17,11 @@ require 'pivotal-tracker'
 require 'json'
 
 # uncomment to debug
-# require 'net-http-spy'
-# puts ENV['GITHUB_PASSWORD']
-# puts ENV['PIVOTAL_TOKEN']
+#require 'net-http-spy'
+#puts ENV['GITHUB_PASSWORD']
+#puts ENV['PIVOTAL_TOKEN']
 
-dry_run = true
+dry_run = false
 
 begin
 
@@ -35,15 +34,15 @@ begin
 
   github = Octokit::Client.new(:login => GITHUB_LOGIN, :password => GITHUB_PASSWORD)
 
-  issues_filter = 'bug' # update filter as appropriate
+  issues_filter = 'push' # update filter as appropriate
 
-  story_type = 'bug' # 'bug', 'feature', 'chore', 'release'. Omitting makes it a feature.
+  story_type = 'feature' # 'bug', 'feature', 'chore', 'release'. Omitting makes it a feature.
 
   story_current_state = 'unscheduled' # 'unscheduled', 'started', 'accepted', 'delivered', 'finished', 'unscheduled'.
                                       # 'unstarted' puts it in 'Current' if Commit Mode is on; 'Backlog' if Auto Mode is on.
                                       # Omitting puts it in the Icebox.
 
-  total_issues = 0 
+  total_issues = 0
 
   page_issues = 1
   issues = github.list_issues(GITHUB_REPO, { :page => page_issues, :labels => issues_filter } )
@@ -53,8 +52,8 @@ begin
     issues.each do |issue|
       total_issues += 1
       comments = github.issue_comments(GITHUB_REPO, issue.number)
-      
-      labels = 'github-import'
+
+      labels = ''
       issue.labels.each do |l|
         labels += ",#{l.name}"
       end
@@ -63,13 +62,13 @@ begin
 
       unless dry_run
         story = pivotal_project.stories.create(
-          :name => issue.title,
-          :description => issue.body,
-          :created_at => issue.created_at,
-          :labels => labels,
-          :story_type => story_type,     
-          :current_state => story_current_state
+          name: issue.title,
+          description: issue.body,
+          labels: 'app redesign',
+          story_type: story_type,
+          current_state: story_current_state
         )
+
 
         story.notes.create(
           text: "Migrated from #{issue.html_url}",
@@ -82,9 +81,9 @@ begin
             noted_at: comment.created_at
           )
         end
-        
+
         github.add_comment(GITHUB_REPO, issue.number, "Migrated to pivotal tracker #{story.url}")
-        github.close_issue(GITHUB_REPO, issue.number)
+        #github.close_issue(GITHUB_REPO, issue.number)
       end
     end
 
