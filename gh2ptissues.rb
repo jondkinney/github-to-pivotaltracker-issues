@@ -2,10 +2,10 @@
 
 # Description:  Migrates GitHub Issues to Pivotal Tracker.
 
-GITHUB_USER = 'jondkinney'
-GITHUB_REPO = 'BOLSTR/Bolstr'
-GITHUB_LOGIN = 'jondkinney'
-PIVOTAL_PROJECT_ID = 833843
+GITHUB_USER = ''
+GITHUB_REPO = ''
+GITHUB_LOGIN = ''
+PIVOTAL_PROJECT_ID =
 PIVOTAL_PROJECT_USE_SSL = false
 
 GITHUB_PASSWORD = ''
